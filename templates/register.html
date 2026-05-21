@@ -1,0 +1,8 @@
+{% extends "layout.html" %} {% block container %}
+<form action="/register" method="post">
+  <input type="text" placeholder="username..." /> <br />
+  <input type="password" placeholder="password..." /> <br />
+  <input type="password" placeholder="confirm password.." />
+  <button type="submit">Submit</button>
+</form>
+{% endblock %}
