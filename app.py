@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from forms import RegistrationForm
 from flask_sqlalchemy import SQLAlchemy
 
@@ -52,29 +52,18 @@ def shop():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    message = ""
+    json_data = request.get_json()
+    user_match = User.query.filter_by(username=json_data['uname']).first()
+    if user_match:
+        return jsonify({'Message': 'User already exists!'})
 
-    form = RegistrationForm()
+    new_user = User(username = json_data['uname'], password = json_data['pword'])
+    db.session.add(new_user)
+    db.session.commit()
 
-    if request.method == "POST":
-        if form.validate_on_submit():
-            username = form.data["uname"]
-            password = form.data["pword"]
-            confirm = form.data["confirm"]
-            user_match = User.query.filter_by(username=username).first()
-            if user_match:
-                message = "User already exists!"
-                return render_template("register.html", message=message,form=form)
-
-
-            us = User(
-                username=username,
-                password=password
-            )
-            db.session.add(us)
-            db.session.commit()
-            message = f"Successfully registered {username}!"
-        else:
-            message = "Registration failed."
-
-    return render_template("register.html", message=message, form=form)
+    return jsonify({'Message': 'A new user was created!'}) 
+@app.route("/admin", methods=["GET"])
+def admin():
+    users = User.query.all()
+    shippers = ShippingInfo.query.all()
+    return render_template("admin.html", users=users, shippers=shippers)
